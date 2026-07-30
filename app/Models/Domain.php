@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use ApiPlatform\Metadata\ApiResource;
 use App\Traits\HasHostingFeatures;
 use Database\Factories\DomainFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
@@ -32,6 +33,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
     'git_repository',
     'git_branch',
 ])]
+#[ApiResource]
 class Domain extends Model
 {
     /** @use HasFactory<DomainFactory> */
