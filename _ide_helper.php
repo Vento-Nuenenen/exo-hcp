@@ -25456,6 +25456,67 @@ namespace Illuminate\Testing {
             }
     }
 
+namespace App\Http\Requests\Settings {
+    /**
+     */
+    class PasswordUpdateRequest extends \Illuminate\Foundation\Http\FormRequest {
+            }
+    /**
+     */
+    class TwoFactorAuthenticationRequest extends \Illuminate\Foundation\Http\FormRequest {
+            }
+    /**
+     */
+    class ProfileDeleteRequest extends \Illuminate\Foundation\Http\FormRequest {
+            }
+    /**
+     */
+    class ProfileUpdateRequest extends \Illuminate\Foundation\Http\FormRequest {
+            }
+    }
+
+namespace Illuminate\Foundation\Http {
+    /**
+     */
+    class FormRequest extends \Illuminate\Http\Request {
+            }
+    }
+
+namespace App\Http\Requests\Hosting {
+    /**
+     */
+    class UpdateHostingUserRequest extends \Illuminate\Foundation\Http\FormRequest {
+            }
+    /**
+     */
+    class UpdateSubdomainRequest extends \Illuminate\Foundation\Http\FormRequest {
+            }
+    /**
+     */
+    class StoreDomainRequest extends \Illuminate\Foundation\Http\FormRequest {
+            }
+    /**
+     */
+    class StoreManagedServerRequest extends \Illuminate\Foundation\Http\FormRequest {
+            }
+    /**
+     */
+    class UpdateDomainRequest extends \Illuminate\Foundation\Http\FormRequest {
+            }
+    /**
+     */
+    class StoreSubdomainRequest extends \Illuminate\Foundation\Http\FormRequest {
+            }
+    /**
+     */
+    class UpdateManagedServerRequest extends \Illuminate\Foundation\Http\FormRequest {
+            }
+    /**
+     */
+    class StoreHostingUserRequest extends \Illuminate\Foundation\Http\FormRequest {
+            }
+    }
+
 
 namespace  {
     class App extends \Illuminate\Support\Facades\App {}
