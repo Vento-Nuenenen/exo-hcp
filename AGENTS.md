@@ -1,3 +1,112 @@
+# Managed Server Agent Documentation
+
+This document describes the configuration format and API communication for the `exo-hcp` Go agent.
+
+## Configuration Format
+
+The dashboard exports server configuration in JSON format. The agent should pull this configuration (or receive it via push) to set up the web servers and runtimes.
+
+### Export Endpoint
+`GET /hosting/servers/{id}/export` (Requires authentication)
+
+### JSON Structure
+```json
+{
+  "id": 1,
+  "name": "Production Server 01",
+  "agent_token": "secret-token",
+  "domains": [
+    {
+      "id": 1,
+      "name": "example.com",
+      "document_root": "/var/www/example.com",
+      "web_server": "nginx",
+      "runtime": "php",
+      "runtime_version": "8.3",
+      "git": {
+        "repository": "https://github.com/user/repo.git",
+        "branch": "main"
+      },
+      "subdomains": [
+        {
+          "id": 1,
+          "name": "app",
+          "full_domain": "app.example.com",
+          "document_root": "/var/www/app.example.com",
+          "runtime": "node",
+          "runtime_version": "20",
+          "git": null
+        }
+      ]
+    }
+  ]
+}
+```
+
+## API Communication
+
+### Pushing Stats
+The agent should periodically push its health and usage stats to the dashboard.
+
+**Endpoint:** `POST /hosting/agent/stats`  
+**Authentication:** The `agent_token` must be included in the request body.
+
+**Request Body:**
+```json
+{
+  "agent_token": "secret-token",
+  "cpu_usage": 15.5,
+  "memory_usage": 45.2,
+  "disk_usage": 30.0,
+  "uptime": 86400
+}
+```
+
+**Response:**
+```json
+{
+  "status": "success"
+}
+```
+
+## Implementation Guidelines for Go Client
+
+1.  **Periodical Polling/Heartbeat**: The client should send stats every 60 seconds.
+2.  **Configuration Application**: When the configuration changes, the client should:
+    *   Update Nginx/Apache virtual host files.
+    *   Ensure the requested runtime version is installed/available.
+    *   Perform Git operations (clone/pull) if a repository is defined.
+    *   Reload web server services.
+3.  **Security**: All communication should happen over HTTPS. The `agent_token` is the primary secret.
+
+## Async Communication
+
+The dashboard can push configuration changes and request stats asynchronously. The agent should implement endpoints to handle these incoming requests.
+
+### Configuration Push (Dashboard to Agent)
+**Dashboard Endpoint:** `POST /hosting/servers/{id}/push-config` (Async)
+**Agent Endpoint:** `POST /config/update`
+
+**Request Body from Dashboard:**
+(Same as JSON Structure above)
+
+**Expected Agent Response:**
+```json
+{
+  "status": "success",
+  "message": "Configuration received and applied"
+}
+```
+
+### Stats Request (Dashboard to Agent)
+**Dashboard Endpoint:** `POST /hosting/servers/{id}/refresh-stats` (Async)
+**Agent Endpoint:** `GET /stats`
+
+**Expected Agent Response:**
+(Same as Pushing Stats request body above, excluding `agent_token`)
+
+===
+
 <laravel-boost-guidelines>
 === foundation rules ===
 
