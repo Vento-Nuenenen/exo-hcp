@@ -10,8 +10,13 @@ import {
     Trash2,
     ExternalLink,
     Download,
+    Settings,
+    RefreshCw,
+    Upload,
 } from '@lucide/vue';
 import { ref } from 'vue';
+import { useHttp } from '@inertiajs/vue3';
+import { toast } from 'vue-sonner';
 import Heading from '@/components/Heading.vue';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -44,6 +49,13 @@ interface ManagedServerItem {
     host: string;
     port: number;
     is_active: boolean;
+    stats?: {
+        cpu_usage: number;
+        memory_usage: number;
+        disk_usage: number;
+        uptime: number;
+        last_updated: string;
+    };
 }
 
 interface DomainItem {
@@ -77,6 +89,31 @@ defineProps<{
 }>();
 
 const activeTab = ref('overview');
+const http = useHttp();
+const serverStats = ref<Record<number, ManagedServerItem['stats']>>({});
+
+const pushConfig = async (serverId: number) => {
+    try {
+        const response = await http.post(`/hosting/servers/${serverId}/push-config`);
+        if (response.data.status === 'success') {
+            toast.success(response.data.message);
+        }
+    } catch (error) {
+        toast.error('Failed to push configuration');
+    }
+};
+
+const refreshStats = async (serverId: number) => {
+    try {
+        const response = await http.post(`/hosting/servers/${serverId}/refresh-stats`);
+        if (response.data.status === 'success') {
+            serverStats.value[serverId] = response.data.stats;
+            toast.success('Stats updated');
+        }
+    } catch (error) {
+        toast.error('Failed to refresh stats');
+    }
+};
 
 defineOptions({
     layout: {
@@ -267,6 +304,13 @@ defineOptions({
                             <div class="flex gap-2">
                                 <Button variant="ghost" size="icon" as-child>
                                     <Link
+                                        :href="`/hosting/domains/${domain.id}/edit`"
+                                    >
+                                        <Settings class="h-4 w-4" />
+                                    </Link>
+                                </Button>
+                                <Button variant="ghost" size="icon" as-child>
+                                    <Link
                                         :href="`/hosting/domains/${domain.id}`"
                                         method="delete"
                                         as="button"
@@ -344,6 +388,12 @@ defineOptions({
                                             class="text-xs text-muted-foreground"
                                             >{{ sub.runtime }}</span
                                         >
+                                        <Link
+                                            :href="`/hosting/subdomains/${sub.id}/edit`"
+                                            class="text-muted-foreground hover:text-foreground"
+                                        >
+                                            <Settings class="h-3.5 w-3.5" />
+                                        </Link>
                                         <Link
                                             :href="`/hosting/subdomains/${sub.id}`"
                                             method="delete"
@@ -606,6 +656,40 @@ defineOptions({
                         </Badge>
                     </CardHeader>
                     <CardContent>
+                        <div
+                            v-if="serverStats[server.id]"
+                            class="mb-4 grid grid-cols-4 gap-4 rounded-lg bg-muted/50 p-4 text-xs"
+                        >
+                            <div>
+                                <div class="text-muted-foreground">CPU</div>
+                                <div class="font-medium">
+                                    {{ serverStats[server.id].cpu_usage }}%
+                                </div>
+                            </div>
+                            <div>
+                                <div class="text-muted-foreground">RAM</div>
+                                <div class="font-medium">
+                                    {{ serverStats[server.id].memory_usage }}%
+                                </div>
+                            </div>
+                            <div>
+                                <div class="text-muted-foreground">Disk</div>
+                                <div class="font-medium">
+                                    {{ serverStats[server.id].disk_usage }}%
+                                </div>
+                            </div>
+                            <div>
+                                <div class="text-muted-foreground">Uptime</div>
+                                <div class="font-medium">
+                                    {{
+                                        Math.floor(
+                                            serverStats[server.id].uptime /
+                                                3600,
+                                        )
+                                    }}h
+                                </div>
+                            </div>
+                        </div>
                         <div class="flex items-center justify-between">
                             <div class="text-sm text-muted-foreground">
                                 {{
@@ -620,6 +704,24 @@ defineOptions({
                                 <Button
                                     variant="outline"
                                     size="sm"
+                                    title="Refresh Stats"
+                                    @click="refreshStats(server.id)"
+                                >
+                                    <RefreshCw class="mr-2 h-4 w-4" />
+                                    Stats
+                                </Button>
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    title="Push Configuration to Agent"
+                                    @click="pushConfig(server.id)"
+                                >
+                                    <Upload class="mr-2 h-4 w-4" />
+                                    Push
+                                </Button>
+                                <Button
+                                    variant="outline"
+                                    size="sm"
                                     as-child
                                     title="Export Configuration"
                                 >
@@ -630,6 +732,13 @@ defineOptions({
                                         <Download class="mr-2 h-4 w-4" />
                                         Export
                                     </a>
+                                </Button>
+                                <Button variant="ghost" size="icon" as-child>
+                                    <Link
+                                        :href="`/hosting/servers/${server.id}/edit`"
+                                    >
+                                        <Settings class="h-4 w-4" />
+                                    </Link>
                                 </Button>
                                 <Button variant="ghost" size="icon" as-child>
                                     <Link
