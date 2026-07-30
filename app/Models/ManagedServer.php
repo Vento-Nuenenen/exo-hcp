@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use ApiPlatform\Metadata\ApiResource;
 use Database\Factories\ManagedServerFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -15,6 +16,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
     'agent_token',
     'is_active',
 ])]
+#[ApiResource]
 class ManagedServer extends Model
 {
     /** @use HasFactory<ManagedServerFactory> */
