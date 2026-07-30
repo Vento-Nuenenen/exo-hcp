@@ -21,8 +21,15 @@ class UpdateManagedServerRequest extends FormRequest
             'name' => ['required', 'string', 'max:255'],
             'host' => ['required', 'string', 'max:255'],
             'port' => ['required', 'integer', 'between:1,65535'],
-            'agent_token' => ['required', 'string', 'max:255'],
-            'is_active' => ['required', 'boolean'],
+            'agent_token' => ['nullable', 'string', 'max:255'],
+            'is_active' => ['nullable', 'boolean'],
         ];
+    }
+
+    protected function prepareForValidation(): void
+    {
+        $this->merge([
+            'is_active' => $this->has('is_active'),
+        ]);
     }
 }
