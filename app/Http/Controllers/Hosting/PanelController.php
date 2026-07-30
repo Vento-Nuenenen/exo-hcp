@@ -86,7 +86,12 @@ class PanelController extends Controller
 
     public function updateManagedServer(UpdateManagedServerRequest $request, ManagedServer $managedServer): RedirectResponse
     {
-        $managedServer->update($request->validated());
+        $data = $request->validated();
+        if (empty($data['agent_token'])) {
+            unset($data['agent_token']);
+        }
+
+        $managedServer->update($data);
 
         return to_route('hosting.index');
     }
@@ -104,6 +109,31 @@ class PanelController extends Controller
         $config = $service->exportToJson($managedServer);
 
         return response()->json(json_decode($config, true));
+    }
+
+    public function editDomain(Domain $domain)
+    {
+        return Inertia::render('hosting/domains/Edit', [
+            'domain' => $domain->load(['user', 'managedServer']),
+            'users' => User::all(),
+            'managedServers' => ManagedServer::all(),
+        ]);
+    }
+
+    public function editSubdomain(Subdomain $subdomain)
+    {
+        return Inertia::render('hosting/subdomains/Edit', [
+            'subdomain' => $subdomain->load(['domain', 'managedServer']),
+            'domains' => Domain::all(),
+            'managedServers' => ManagedServer::all(),
+        ]);
+    }
+
+    public function editManagedServer(ManagedServer $managedServer)
+    {
+        return Inertia::render('hosting/servers/Edit', [
+            'managedServer' => $managedServer,
+        ]);
     }
 
     public function updateDomain(UpdateDomainRequest $request, Domain $domain): RedirectResponse
