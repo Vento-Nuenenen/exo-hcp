@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use ApiPlatform\Metadata\ApiResource;
 use App\Traits\HasHostingFeatures;
 use Database\Factories\SubdomainFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
@@ -19,6 +20,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
     'git_repository',
     'git_branch',
 ])]
+#[ApiResource]
 class Subdomain extends Model
 {
     /** @use HasFactory<SubdomainFactory> */
