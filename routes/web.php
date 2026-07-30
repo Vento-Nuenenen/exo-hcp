@@ -1,6 +1,9 @@
 <?php
 
+use App\Http\Controllers\Hosting\AgentController;
+use App\Http\Controllers\Hosting\AsyncController;
 use App\Http\Controllers\Hosting\PanelController;
+use App\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Support\Facades\Route;
 
 Route::inertia('/', 'Welcome')->name('home');
@@ -17,6 +20,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::patch('hosting/servers/{managedServer}', [PanelController::class, 'updateManagedServer'])->name('hosting.servers.update');
     Route::delete('hosting/servers/{managedServer}', [PanelController::class, 'destroyManagedServer'])->name('hosting.servers.destroy');
     Route::get('hosting/servers/{managedServer}/export', [PanelController::class, 'exportManagedServerConfig'])->name('hosting.servers.export');
+    Route::post('hosting/servers/{managedServer}/push-config', [AsyncController::class, 'pushConfig'])->name('hosting.servers.push-config');
+    Route::post('hosting/servers/{managedServer}/refresh-stats', [AsyncController::class, 'refreshStats'])->name('hosting.servers.refresh-stats');
+
+    Route::get('hosting/domains/{domain}/edit', [PanelController::class, 'editDomain'])->name('hosting.domains.edit');
+    Route::get('hosting/subdomains/{subdomain}/edit', [PanelController::class, 'editSubdomain'])->name('hosting.subdomains.edit');
+    Route::get('hosting/servers/{managedServer}/edit', [PanelController::class, 'editManagedServer'])->name('hosting.servers.edit');
 
     Route::post('hosting/domains', [PanelController::class, 'storeDomain'])->name('hosting.domains.store');
     Route::patch('hosting/domains/{domain}', [PanelController::class, 'updateDomain'])->name('hosting.domains.update');
@@ -25,6 +34,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('hosting/subdomains', [PanelController::class, 'storeSubdomain'])->name('hosting.subdomains.store');
     Route::patch('hosting/subdomains/{subdomain}', [PanelController::class, 'updateSubdomain'])->name('hosting.subdomains.update');
     Route::delete('hosting/subdomains/{subdomain}', [PanelController::class, 'destroySubdomain'])->name('hosting.subdomains.destroy');
+
+    Route::post('hosting/agent/stats', [AgentController::class, 'stats'])->name('hosting.agent.stats');
 });
+
+Route::post('hosting/agent/stats/public', [AgentController::class, 'stats'])->name('hosting.agent.stats.public')->withoutMiddleware([VerifyCsrfToken::class]);
 
 require __DIR__.'/settings.php';
