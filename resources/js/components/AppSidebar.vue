@@ -23,6 +23,11 @@ const mainNavItems: NavItem[] = [
         href: dashboard(),
         icon: LayoutGrid,
     },
+    {
+        title: 'Hosting',
+        href: '/hosting',
+        icon: LayoutGrid,
+    },
 ];
 
 const footerNavItems: NavItem[] = [
